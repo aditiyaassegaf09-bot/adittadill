@@ -1,0 +1,75 @@
+
+// ===== EXTREME PHYSICS =====
+
+// Sprint lebih cepat
+let sprinting = keys.ShiftLeft || keys.ShiftRight;
+let speed = sprinting ? 11 : 5;
+
+// Update moving platforms
+for (const p of movingPlatforms) {
+  p.time += dt;
+
+  p.mesh.position.x =
+    p.startX + Math.sin(p.time * 1.5) * 2;
+
+  const data = platforms.find(
+    item => item.moving === p.mesh
+  );
+
+  if (data) {
+    data.x = p.mesh.position.x;
+  }
+}
+
+// Periksa lava dan paku
+for (const h of hazards) {
+  const dx = Math.abs(player.position.x - h.x);
+  const dz = Math.abs(player.position.z - h.z);
+
+  let dangerous = false;
+
+  if (h.type === "lava") {
+    dangerous =
+      dx < h.w / 2 &&
+      dz < h.d / 2 &&
+      player.position.y < 1.5;
+  }
+
+  if (h.type === "spike") {
+    dangerous =
+      dx < 2 &&
+      dz < 0.7 &&
+      player.position.y < 1.2;
+  }
+
+  if (dangerous) {
+    extremeReset();
+    break;
+  }
+}
+
+// Checkpoint
+if (
+  player.position.z < -39 &&
+  player.position.x > 2 &&
+  player.position.x < 6 &&
+  player.position.y < 3
+) {
+  checkpoint.set(4, 4, -40);
+}
+
+// Efek sprint
+if (sprinting &&
+    (keys.KeyW || keys.KeyA ||
+     keys.KeyS || keys.KeyD)) {
+  if (Math.random() < 0.2) createDust();
+}
+
+// Tambahkan bonus koin
+// Ketika semua koin terkumpul
+if (coins.length === 0) {
+  document.getElementById("message").innerHTML =
+    "⭐ PERFECT! SEMUA KOIN TERKUMPUL!";
+  document.getElementById("message").style.display =
+    "block";
+}
